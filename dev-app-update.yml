@@ -1,0 +1,11 @@
+# Anime Production Studio — configuración del actualizador en DESARROLLO.
+#
+# electron-updater solo comprueba actualizaciones en la app empaquetada,
+# salvo que se active `autoUpdater.forceDevUpdateConfig = true` (ver
+# electron/main.ts): entonces lee ESTE archivo desde la raíz del proyecto
+# y permite probar la comprobación sin empaquetar. Debe coincidir con
+# electron/app-update.yml (la configuración de la app instalada).
+provider: github
+owner: stivenft202
+repo: anime-production-studio
+updaterCacheDirName: anime-production-studio
