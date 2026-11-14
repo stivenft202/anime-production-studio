@@ -1,0 +1,110 @@
+# Anime Production Studio — build del instalador de Windows
+#
+# Construye el instalador ANIME-PRODUCTION-STUDIO-SETUP.exe en un runner
+# windows-latest de GitHub Actions, de forma automática y transparente:
+#   1) checkout del código
+#   2) Node.js LTS + npm ci
+#   3) npm run build (front + Electron)
+#   4) electron-builder --win dir (empaquetado sin wine)
+#   5) makensis con installer/anime-production-studio.nsi (instalador NSIS)
+#   6) latest.yml (+ .blockmap) para el actualizador de la app
+#   7) subida del instalador + latest.yml + .blockmap como artefacto
+#
+# Este workflow SOLO construye y sube el artefacto: NO publica releases
+# automáticamente. La publicación de una release en GitHub (y su firma
+# con SignPath) sigue siendo manual, con aprobación del mantenedor.
+# Ver CODE_SIGNING_POLICY.md.
+#
+# Notas verificadas contra la documentación actual (2026-11-14):
+# - actions/checkout@v7, actions/setup-node@v7 y actions/upload-artifact@v7
+#   son las versiones major actuales (releases de GitHub, noviembre 2026).
+# - NSIS NO viene preinstalado en los runners windows-latest: se instala
+#   con Chocolatey (choco viene preinstalado) y se añade su carpeta al PATH.
+# - Node.js 24 es la versión LTS actual; setup-node con cache: npm usa el
+#   package-lock.json del repo.
+name: Build Windows installer
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      # Sin firma local: el instalador se firma después, en la release
+      # (SignPath). Evita que electron-builder intente descubrir un
+      # certificado en el runner.
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js LTS
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Read version from package.json
+        id: version
+        shell: pwsh
+        run: |
+          $pkg = Get-Content package.json -Raw | ConvertFrom-Json
+          "version=$($pkg.version)" >> $env:GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Install NSIS
+        shell: pwsh
+        run: |
+          choco install nsis -y --no-progress
+          # Chocolatey no siempre refresca el PATH en la sesión actual:
+          # se añade la carpeta de NSIS al PATH de los pasos siguientes.
+          "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          makensis -version
+
+      - name: Package Windows app (electron-builder --win dir)
+        run: npx electron-builder --config electron-builder.yml --win dir
+
+      - name: Build NSIS installer (makensis)
+        shell: pwsh
+        run: |
+          $unpacked = "$PWD\release\win-unpacked"
+          $outfile = "$PWD\release\ANIME-PRODUCTION-STUDIO-SETUP.exe"
+          if (-not (Test-Path "$unpacked\Anime Production Studio.exe")) {
+            throw "No se encontró $unpacked\Anime Production Studio.exe tras electron-builder."
+          }
+          makensis /DVERSION="${{ steps.version.outputs.version }}" /DSRCDIR="$unpacked" /DOUTFILE="$outfile" installer\anime-production-studio.nsi
+          if (-not (Test-Path $outfile)) {
+            throw "No se generó el instalador $outfile."
+          }
+
+      - name: Generate latest.yml (+ .blockmap) for electron-updater
+        shell: pwsh
+        run: node scripts/make-latest-yml.mjs release\ANIME-PRODUCTION-STUDIO-SETUP.exe "${{ steps.version.outputs.version }}" release
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-installer-${{ steps.version.outputs.version }}
+          path: |
+            release/ANIME-PRODUCTION-STUDIO-SETUP.exe
+            release/latest.yml
+            release/ANIME-PRODUCTION-STUDIO-SETUP.exe.blockmap
+          if-no-files-found: error
+          retention-days: 30
