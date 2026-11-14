@@ -93,7 +93,12 @@ jobs:
           if (-not (Test-Path "$unpacked\Anime Production Studio.exe")) {
             throw "No se encontró $unpacked\Anime Production Studio.exe tras electron-builder."
           }
-          makensis /DVERSION="${{ steps.version.outputs.version }}" /DSRCDIR="$unpacked" /DOUTFILE="$outfile" installer\anime-production-studio.nsi
+          # makensis resuelve las rutas relativas del .nsi (p. ej.
+          # assets/welcome.bmp) respecto a su cwd: se ejecuta desde
+          # installer/ para que coincida con el build local.
+          Push-Location installer
+          makensis /DVERSION="${{ steps.version.outputs.version }}" /DSRCDIR="$unpacked" /DOUTFILE="$outfile" anime-production-studio.nsi
+          Pop-Location
           if (-not (Test-Path $outfile)) {
             throw "No se generó el instalador $outfile."
           }
