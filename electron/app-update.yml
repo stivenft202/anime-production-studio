@@ -1,0 +1,15 @@
+# Anime Production Studio — configuración del actualizador en la app instalada.
+#
+# electron-updater lee este archivo desde resources/app-update.yml (junto al
+# ejecutable) y comprueba las releases de GitHub. Se incluye como
+# extraResource en electron-builder.yml porque electron-builder solo genera
+# app-update.yml automáticamente para los targets nsis/nsis-*, y este
+# proyecto empaqueta con el target `dir` + NSIS nativo (ver PROGRESS.md).
+#
+# El repo es PÚBLICO: la app descarga las actualizaciones sin token. El repo
+# solo guarda instaladores y metadatos (latest.yml), nunca el código fuente
+# ni los datos del usuario.
+provider: github
+owner: stivenft202
+repo: anime-production-studio
+updaterCacheDirName: anime-production-studio
