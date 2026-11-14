@@ -1,0 +1,50 @@
+# Anime Production Studio — configuración de electron-builder (Fase 2.5)
+# Genera solo el directorio desempaquetado para Windows (sin wine):
+#   npm run dist:win   ->   electron-builder --win dir
+# El instalador SETUP.exe con asistente lo construye NSIS (ver
+# installer/anime-production-studio.nsi y scripts/build-installer.sh).
+#
+# Actualizaciones en la app (electron-updater, fase 2.5):
+#   - `publish` apunta al repo público de GitHub. electron-builder NO
+#     escribe `app-update.yml` para el target `dir` (solo lo hace para
+#     nsis/nsis-*), así que se incluye el archivo estático
+#     electron/app-update.yml como extraResource: cae en
+#     resources/app-update.yml dentro de win-unpacked y el instalador
+#     NSIS lo copia a $INSTDIR\resources\app-update.yml, que es donde
+#     electron-updater lo busca en la app instalada.
+#   - En desarrollo se usa dev-app-update.yml (raíz del proyecto) con
+#     autoUpdater.forceDevUpdateConfig = true (ver electron/main.ts).
+appId: com.stiven.animeproductionstudio
+productName: Anime Production Studio
+directories:
+  output: release
+files:
+  - dist/**
+  - dist-electron/**
+  - package.json
+publish:
+  provider: github
+  owner: stivenft202
+  repo: anime-production-studio
+win:
+  target:
+    - target: dir
+      arch:
+        - x64
+  icon: assets/icon.ico
+  # Sin firma y sin edición de recursos del exe: en Linux, electron-builder
+  # necesitaría wine para rcedit/signtool y no se puede instalar (muro de
+  # disco). El instalador es SIN FIRMA (SmartScreen avisará) y el exe
+  # conserva el icono por defecto de Electron; el icono propio se aplica
+  # en los accesos directos del instalador NSIS (ver .nsi) y se incluye
+  # como recurso extra para eso.
+  signAndEditExecutable: false
+extraResources:
+  - from: assets/icon.ico
+    to: icon.ico
+  # Configuración del actualizador (electron-updater). electron-builder
+  # no la genera para el target `dir`: este archivo estático es el que
+  # llega a resources/app-update.yml en la app instalada. Debe coincidir
+  # con `publish` de arriba y con dev-app-update.yml (desarrollo).
+  - from: electron/app-update.yml
+    to: app-update.yml
