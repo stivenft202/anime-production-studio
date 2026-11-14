@@ -21,7 +21,10 @@
   !define VERSION "1.0.0"
 !endif
 !ifndef SRCDIR
-  !define SRCDIR "release/win-unpacked"
+  ; Con barra final: el File de la sección usa "${SRCDIR}*.*", así la
+  ; ruta queda con el separador correcto en cada plataforma ("/" en el
+  ; build local de Linux, "\" en el runner de Windows).
+  !define SRCDIR "release/win-unpacked/"
 !endif
 !ifndef OUTFILE
   !define OUTFILE "release/ANIME-PRODUCTION-STUDIO-SETUP.exe"
@@ -158,7 +161,8 @@ Section "Anime Production Studio" SecMain
   SetOutPath $INSTDIR
 
   ; Copia TODO el contenido desempaquetado por electron-builder.
-  File /r "${SRCDIR}/*.*"
+  ; (SRCDIR lleva barra final; ver el !ifndef SRCDIR de arriba.)
+  File /r "${SRCDIR}*.*"
 
   ; Desinstalador.
   WriteUninstaller "$INSTDIR\Uninstall.exe"
