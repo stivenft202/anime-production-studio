@@ -95,9 +95,10 @@ jobs:
           }
           # El makensis de Windows (3.13) no resuelve la ruta relativa del
           # bitmap (assets/welcome.bmp) ni desde la raíz del repo ni desde
-          # installer/: se le pasa la ruta ABSOLUTA con /DWELCOMEBMP
-          # (con barras normales para evitar escapes en NSIS).
-          $welcomebmp = (($PWD).Path -replace '\\','/') + "/installer/assets/welcome.bmp"
+          # installer/, y la ruta absoluta con barras normales tampoco la
+          # reconoce como absoluta: se le pasa con barras invertidas.
+          $welcomebmp = "$PWD\installer\assets\welcome.bmp"
+          Get-Item $welcomebmp | Format-List FullName,Length
           if (-not (Test-Path $welcomebmp)) {
             throw "No se encontró el bitmap $welcomebmp."
           }
