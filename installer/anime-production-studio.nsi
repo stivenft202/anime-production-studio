@@ -36,9 +36,15 @@ ${Using:StrFunc} StrStr
 ; --- Bitmap de bienvenida/fin ----------------------------------------------
 ; Bitmap genérico derivado de assets/icon.png (letra "A" violeta) en 24 bits
 ; 164x314 px, sin texto. Sale en la página de bienvenida y en la de fin.
-; Ruta relativa al directorio del script: makensis resuelve los File
-; relativos respecto a la carpeta del .nsi (installer/), no respecto al cwd.
-!define MUI_WELCOMEFINISHPAGE_BITMAP "assets/welcome.bmp"
+; La ruta puede venir como /DWELCOMEBMP=... (ruta ABSOLUTA, la usa el build
+; de GitHub Actions); sin ella se usa la ruta relativa, que el makensis de
+; Linux resuelve respecto a la carpeta del .nsi. El makensis de Windows
+; (3.13, runner) NO resuelve esa ruta relativa ni desde la raíz del repo
+; ni desde installer/: por eso en Actions se pasa la ruta absoluta.
+!ifndef WELCOMEBMP
+  !define WELCOMEBMP "assets/welcome.bmp"
+!endif
+!define MUI_WELCOMEFINISHPAGE_BITMAP "${WELCOMEBMP}"
 
 ; --- Datos generales -------------------------------------------------------
 Name "Anime Production Studio"
