@@ -88,7 +88,7 @@ jobs:
       - name: Build NSIS installer (makensis)
         shell: pwsh
         run: |
-          $unpacked = "$PWD\release\win-unpacked"
+          $unpacked = "$PWD\release\win-unpacked\"
           $outfile = "$PWD\release\ANIME-PRODUCTION-STUDIO-SETUP.exe"
           if (-not (Test-Path "$unpacked\Anime Production Studio.exe")) {
             throw "No se encontró $unpacked\Anime Production Studio.exe tras electron-builder."
