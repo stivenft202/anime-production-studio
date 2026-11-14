@@ -21,7 +21,11 @@ VERSION="${VERSION:-1.0.0}"
 EXE_NAME="Anime Production Studio.exe"
 # Rutas ABSOLUTAS: makensis resuelve las rutas relativas del .nsi respecto
 # a la carpeta del script (installer/), no respecto al cwd.
-UNPACKED_DIR="$(pwd)/release/win-unpacked"
+# UNPACKED_DIR lleva barra final: el .nsi usa "${SRCDIR}*.*" (sin "/" entre
+# SRCDIR y *.*) porque el makensis de Windows (3.13) no acepta la ruta
+# mezclada "D:\...\win-unpacked/*.*"; con la barra final la ruta queda con
+# el separador correcto en cada plataforma.
+UNPACKED_DIR="$(pwd)/release/win-unpacked/"
 OUT_SETUP="$(pwd)/release/ANIME-PRODUCTION-STUDIO-SETUP.exe"
 
 echo "== Anime Production Studio — build del instalador (v${VERSION}) =="
