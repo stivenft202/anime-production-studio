@@ -1,0 +1,19 @@
+Ejemplo de prompt de estilo para una hoja de personaje (datos DEMO inventados, para probar la biblioteca de prompts).
+
+Dibuja desde cero una hoja de personaje de una exploradora llamada Mara, de 28 años, complexion atletica, cabello castaño recogido en una trenza, ojos verdes, vistiendo chaqueta verde oliva, pantalon marron y botas de cuero, con una libreta de mapas en la mano. (ver imagen de referencia)
+
+
+
+RENDERIZA TODO el personaje con la tecnica de dibujo de la imagen de referencia: lineart de grosor irregular y trazo manual, cell shading suave con bordes ligeramente difusos sin gradientes artificiales, piel con textura y variacion de tono natural, un solo brillo simple en los ojos pintado a mano, mechones de cabello de grosor irregular y no perfectamente simetricos, paleta poco saturada.
+
+
+
+PROHIBIDO usar sombreado tipo render 3D, brillo ceroso o plastificado en piel y cabello, simetria facial perfecta, lineart vectorial uniforme, multiples reflejos en los ojos, degradados de color en cabello u ojos, o cualquier acabado pulido tipico de ilustracion generada por IA sin retoque. El resultado debe verse como si el mismo ilustrador humano que dibujo la referencia hubiera dibujado tambien a Mara desde cero, con sus mismas imperfecciones de trazo.
+
+
+
+COMPOSICION OBLIGATORIA DE LA HOJA, fondo blanco liso sin sombras de escena:
+
+ARRIBA: tres vistas de cuerpo completo en fila, en este orden: de perfil, de espalda y de frente.
+
+ABAJO: tres vistas de medio cuerpo en primer plano en fila, en este orden: de perfil, de espalda y de frente.
