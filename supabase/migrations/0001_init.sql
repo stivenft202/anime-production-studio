@@ -26,24 +26,6 @@
 create extension if not exists "pgcrypto";
 
 -- ---------------------------------------------------------------------------
--- Función auxiliar: ¿el usuario autenticado pertenece a esta organización?
--- SECURITY DEFINER para poder leer organization_members sin recursión de RLS.
--- ---------------------------------------------------------------------------
-create or replace function public.is_org_member(org_id uuid)
-returns boolean
-language sql
-security definer
-stable
-as $$
-  select exists (
-    select 1
-    from public.organization_members om
-    where om.organization_id = org_id
-      and om.user_id = auth.uid()
-  );
-$$;
-
--- ---------------------------------------------------------------------------
 -- Función + trigger genérico de updated_at
 -- ---------------------------------------------------------------------------
 create or replace function public.set_updated_at()
@@ -101,6 +83,28 @@ create table if not exists public.organization_members (
   unique (organization_id, user_id)
 );
 comment on table public.organization_members is 'Miembros de cada organización con su rol.';
+
+-- ---------------------------------------------------------------------------
+-- Función auxiliar: ¿el usuario autenticado pertenece a esta organización?
+-- SECURITY DEFINER para poder leer organization_members sin recursión de RLS.
+-- Va DESPUÉS de crear `organization_members`: PostgreSQL valida el cuerpo
+-- de una función SQL al crearla y la tabla debe existir ya (si va antes,
+-- la creación falla con ERROR 42P01: relation "public.organization_members"
+-- does not exist).
+-- ---------------------------------------------------------------------------
+create or replace function public.is_org_member(org_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = org_id
+      and om.user_id = auth.uid()
+  );
+$$;
 
 -- ============================================================================
 -- 4. INVITATIONS — invitaciones por email a una organización
